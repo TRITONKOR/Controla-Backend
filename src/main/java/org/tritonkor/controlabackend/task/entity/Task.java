@@ -25,7 +25,7 @@ public class Task extends AuditableEntity {
     private String description;
 
     @Lob
-    @Column(columnDefinition = "BLOB")
+    @Column(columnDefinition = "BYTEA")
     private byte[] attachments;
 
     @ManyToOne(fetch = FetchType.LAZY)

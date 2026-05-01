@@ -6,12 +6,17 @@ spring:
 
   jpa:
     hibernate:
-      ddl-auto: validate
+      ddl-auto: update
 
     open-in-view: false
 
   flyway:
-    enabled: true
+    enabled: false
 
 server:
   port: 8080
+
+jwt:
+  secret: "change-me-to-a-very-long-random-secret-key-32chars-min"
+  access-expiration-ms: 900000
+  refresh-expiration-ms: 604800000

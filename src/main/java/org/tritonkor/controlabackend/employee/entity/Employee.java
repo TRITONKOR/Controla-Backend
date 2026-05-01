@@ -4,22 +4,32 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.tritonkor.controlabackend.common.entity.AuditableEntity;
 import org.tritonkor.controlabackend.department.entity.Department;
+
+import java.util.Collection;
+import java.util.List;
 
 @Entity
 @Table(name = "employees")
 @Getter
 @Setter
 @NoArgsConstructor
-public class Employee extends AuditableEntity {
+public class Employee extends AuditableEntity implements UserDetails {
+
+    private String firstName;
+    private String lastName;
+
     @Column(unique = true, nullable = false)
     private String email;
 
     private String hashPassword;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "department_id",nullable = false)
+    @JoinColumn(name = "department_id", nullable = true)
     private Department department;
 
     @Enumerated(EnumType.STRING)
@@ -31,4 +41,31 @@ public class Employee extends AuditableEntity {
         this.department = department;
         this.role = role;
     }
+
+    @Override
+    public Collection<? extends GrantedAuthority> getAuthorities() {
+        return List.of(new SimpleGrantedAuthority("ROLE_" + role.name()));
+    }
+
+    @Override
+    public String getPassword() {
+        return hashPassword;
+    }
+
+    @Override
+    public String getUsername() {
+        return email;
+    }
+
+    @Override
+    public boolean isAccountNonExpired() { return true; }
+
+    @Override
+    public boolean isAccountNonLocked() { return true; }
+
+    @Override
+    public boolean isCredentialsNonExpired() { return true; }
+
+    @Override
+    public boolean isEnabled() { return true; }
 }

@@ -22,6 +22,8 @@ import org.tritonkor.controlabackend.user.entity.User;
 import org.tritonkor.controlabackend.user.repository.UserRepository;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.util.Base64;
+
 @RestController
 @RequestMapping("/api/auth")
 @RequiredArgsConstructor
@@ -160,13 +162,22 @@ public class AuthController {
         Employee employee = employeeRepository.findByUser(user)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Employee profile not found"));
 
+        String avatarBase64 = user.getAvatar() == null
+                ? null
+                : Base64.getEncoder().encodeToString(user.getAvatar());
+
         return new AuthResponse(
                 accessToken,
                 new AuthResponse.AuthUser(
                         user.getId(),
                         user.getEmail(),
                         employee.getFirstName(),
-                        employee.getLastName()
+                        employee.getLastName(),
+                        user.getRole().name(),
+                        avatarBase64,
+                        user.getIsActive(),
+                        user.getCreatedAt(),
+                        user.getUpdatedAt()
                 )
         );
     }

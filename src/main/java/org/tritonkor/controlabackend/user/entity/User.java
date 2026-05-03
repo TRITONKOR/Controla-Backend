@@ -30,6 +30,10 @@ public class User extends AuditableEntity implements UserDetails {
     private Boolean isApproved = false;
     private Boolean isActive = true;
 
+    @Lob
+    @Column(columnDefinition = "BYTEA")
+    private byte[] avatar;
+
     public User(String email, String hashPassword, Role role) {
         this.email = email;
         this.hashPassword = hashPassword;

@@ -36,7 +36,7 @@ public class Task extends AuditableEntity {
     @JoinTable(
             name = "task_assignees",
             joinColumns = @JoinColumn(name = "task_id"),
-            inverseJoinColumns = @JoinColumn(name = "user_id")
+            inverseJoinColumns = @JoinColumn(name = "employee_id")
     )
     private Set<Employee> assignees = new HashSet<>();
 

@@ -1,0 +1,6 @@
+ALTER TABLE employees DROP COLUMN IF EXISTS email;
+ALTER TABLE employees DROP COLUMN IF EXISTS hash_password;
+ALTER TABLE employees DROP COLUMN IF EXISTS role;
+
+ALTER TABLE employees DROP COLUMN IF EXISTS "hashPassword";
+

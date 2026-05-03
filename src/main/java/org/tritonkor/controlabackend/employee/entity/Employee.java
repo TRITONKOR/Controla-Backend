@@ -4,68 +4,32 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.tritonkor.controlabackend.common.entity.AuditableEntity;
 import org.tritonkor.controlabackend.department.entity.Department;
-
-import java.util.Collection;
-import java.util.List;
+import org.tritonkor.controlabackend.user.entity.User;
 
 @Entity
 @Table(name = "employees")
 @Getter
 @Setter
 @NoArgsConstructor
-public class Employee extends AuditableEntity implements UserDetails {
+public class Employee extends AuditableEntity {
 
     private String firstName;
     private String lastName;
-
-    @Column(unique = true, nullable = false)
-    private String email;
-
-    private String hashPassword;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "department_id", nullable = true)
     private Department department;
 
-    @Enumerated(EnumType.STRING)
-    private Role role;
+    @OneToOne
+    @JoinColumn(name = "user_id", unique = true, nullable = true)
+    private User user;
 
-    public Employee(String email, String hashPassword, Department department, Role role) {
-        this.email = email;
-        this.hashPassword = hashPassword;
+    public Employee(String firstName, String lastName, Department department, User user) {
+        this.firstName = firstName;
+        this.lastName = lastName;
         this.department = department;
-        this.role = role;
+        this.user = user;
     }
-
-    @Override
-    public Collection<? extends GrantedAuthority> getAuthorities() {
-        return List.of(new SimpleGrantedAuthority("ROLE_" + role.name()));
-    }
-
-    @Override
-    public String getPassword() {
-        return hashPassword;
-    }
-
-    @Override
-    public String getUsername() {
-        return email;
-    }
-
-    @Override
-    public boolean isAccountNonExpired() { return true; }
-
-    @Override
-    public boolean isAccountNonLocked() { return true; }
-
-    @Override
-    public boolean isCredentialsNonExpired() { return true; }
-
-    @Override
-    public boolean isEnabled() { return true; }
 }

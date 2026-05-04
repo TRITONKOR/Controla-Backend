@@ -4,10 +4,12 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.hibernate.annotations.JdbcTypeCode;
 import org.tritonkor.controlabackend.common.entity.AuditableEntity;
 import org.tritonkor.controlabackend.project.entity.Project;
 import org.tritonkor.controlabackend.employee.entity.Employee;
 
+import java.sql.Types;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -24,8 +26,8 @@ public class Task extends AuditableEntity {
     @Column(nullable = false, length = 1000)
     private String description;
 
-    @Lob
-    @Column(columnDefinition = "BYTEA")
+    @JdbcTypeCode(Types.BINARY)
+    @Column(name = "attachments", columnDefinition = "BYTEA")
     private byte[] attachments;
 
     @ManyToOne(fetch = FetchType.LAZY)

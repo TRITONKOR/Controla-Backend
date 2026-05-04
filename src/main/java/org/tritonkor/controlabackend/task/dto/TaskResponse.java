@@ -15,15 +15,14 @@ public record TaskResponse(
 ) {
     public record ProjectShortResponse(
             String id,
-            String title,
-            String description,
-            String status
+            String title
     ) {}
 
     public record EmployeeShortResponse(
             String id,
             String firstName,
             String lastName,
+            String position,
             String departmentTitle
     ) {}
 }

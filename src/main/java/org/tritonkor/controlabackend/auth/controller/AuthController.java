@@ -150,6 +150,7 @@ public class AuthController {
         Employee employee = new Employee();
         employee.setFirstName(request.firstName());
         employee.setLastName(request.lastName());
+        employee.setPosition(null);
         employee.setDepartment(null);
         employee.setUser(user);
 

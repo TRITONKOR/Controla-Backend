@@ -18,6 +18,9 @@ public class Employee extends AuditableEntity {
     private String firstName;
     private String lastName;
 
+    @Enumerated(EnumType.STRING)
+    private EmployeePositions position;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "department_id", nullable = true)
     private Department department;
@@ -26,9 +29,10 @@ public class Employee extends AuditableEntity {
     @JoinColumn(name = "user_id", unique = true, nullable = true)
     private User user;
 
-    public Employee(String firstName, String lastName, Department department, User user) {
+    public Employee(String firstName, String lastName, EmployeePositions position, Department department, User user) {
         this.firstName = firstName;
         this.lastName = lastName;
+        this.position = position;
         this.department = department;
         this.user = user;
     }

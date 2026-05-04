@@ -3,6 +3,7 @@ package org.tritonkor.controlabackend.project.service;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import java.util.Base64;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 import org.tritonkor.controlabackend.employee.entity.Employee;
@@ -62,6 +63,10 @@ public class ProjectService {
                 project.getTitle(),
                 project.getDescription(),
                 project.getOwner() != null ? project.getOwner().getId() : null,
+                project.getOwner() != null ? project.getOwner().getFirstName() : null,
+                project.getOwner() != null ? project.getOwner().getLastName() : null,                project.getOwner() != null && project.getOwner().getUser().getAvatar() != null
+                        ? Base64.getEncoder().encodeToString(project.getOwner().getUser().getAvatar())
+                        : null,
                 project.getStatus() != null ? project.getStatus().name() : null,
                 project.getCosts(),
                 project.getDeadline(),

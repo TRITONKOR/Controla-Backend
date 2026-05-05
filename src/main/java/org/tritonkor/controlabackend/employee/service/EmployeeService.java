@@ -30,6 +30,14 @@ public class EmployeeService {
                 .toList();
     }
 
+    @Transactional(readOnly = true)
+    public List<EmployeeResponse> getEmployeesByProject(Project project) {
+        return project.getAssignees()
+                .stream()
+                .map(this::toResponse)
+                .toList();
+    }
+
     private EmployeeResponse toResponse(Employee employee) {
         UUID employeeId = employee.getId();
         List<Project> projects = projectRepository.findAll();

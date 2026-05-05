@@ -52,6 +52,7 @@ public class Project extends AuditableEntity {
 
     public Project(String title, String description, int costs, LocalDateTime deadline, Employee owner) {
         this.title = title;
+        this.description = description;
         this.owner = owner;
         this.costs = costs;
         this.deadline = deadline;

@@ -6,7 +6,6 @@ import java.util.UUID;
 public record CreateProjectRequest(
         String title,
         String description,
-        UUID ownerId,
         Integer costs,
         LocalDateTime deadline
 ) {

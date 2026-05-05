@@ -6,8 +6,10 @@ import org.springframework.stereotype.Service;
 import java.util.Base64;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
+import org.tritonkor.controlabackend.employee.dto.EmployeeResponse;
 import org.tritonkor.controlabackend.employee.entity.Employee;
 import org.tritonkor.controlabackend.employee.repository.EmployeeRepository;
+import org.tritonkor.controlabackend.employee.service.EmployeeService;
 import org.tritonkor.controlabackend.project.dto.CreateProjectRequest;
 import org.tritonkor.controlabackend.project.dto.ProjectResponse;
 import org.tritonkor.controlabackend.project.entity.Project;
@@ -15,11 +17,17 @@ import org.tritonkor.controlabackend.project.repository.ProjectRepository;
 import org.tritonkor.controlabackend.task.entity.Task;
 import org.tritonkor.controlabackend.user.entity.Role;
 
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+
 import java.util.List;
+import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
 public class ProjectService {
+
+    private final EmployeeService employeeService;
 
     private final ProjectRepository projectRepository;
     private final EmployeeRepository employeeRepository;
@@ -32,17 +40,35 @@ public class ProjectService {
                 .toList();
     }
 
+    @Transactional(readOnly = true)
+    public List<EmployeeResponse> getProjectAssignees(UUID projectId) {
+        Project project = projectRepository.findById(projectId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Project not found"));
+
+        return employeeService.getEmployeesByProject(project);
+    }
+
     @Transactional
     public ProjectResponse createProject(CreateProjectRequest request) {
-        Employee owner = employeeRepository.findById(request.ownerId())
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Owner not found"));
+
+        String email = getCurrentUserEmail();
+
+        Employee owner = employeeRepository.findByUserEmail(email)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Employee not found"));
 
         if (owner.getUser().getRole() != Role.MANAGER) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Owner must be a manager");
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Only managers can create projects");
         }
 
-        Project project = new Project(request.title(), request.description(), request.costs(), request.deadline(), owner);
-        project.setDescription(request.description());
+
+        Project project = new Project(
+                request.title(),
+                request.description(),
+                request.costs(),
+                request.deadline(),
+                owner
+        );
+
 
         return toResponse(projectRepository.save(project));
     }
@@ -95,6 +121,16 @@ public class ProjectService {
                 employee.getLastName(),
                 departmentTitle
         );
+    }
+
+    private String getCurrentUserEmail() {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+
+        if (auth == null || !auth.isAuthenticated()) {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Unauthorized");
+        }
+
+        return auth.getName();
     }
 }
 

@@ -19,6 +19,7 @@ import org.tritonkor.controlabackend.user.entity.Role;
 
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.tritonkor.controlabackend.user.entity.User;
 
 import java.util.List;
 import java.util.UUID;
@@ -46,6 +47,18 @@ public class ProjectService {
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Project not found"));
 
         return employeeService.getEmployeesByProject(project);
+    }
+
+    @Transactional(readOnly = true)
+    public List<ProjectResponse> getUserProjects(UUID userId) {
+        Employee employee = employeeRepository.findByUserId(userId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Employee not found"));
+
+        return projectRepository.findAll()
+                .stream()
+                .filter(project -> project.getAssignees().contains(employee))
+                .map(this::toResponse)
+                .toList();
     }
 
     @Transactional
@@ -133,4 +146,3 @@ public class ProjectService {
         return auth.getName();
     }
 }
-

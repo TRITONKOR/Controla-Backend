@@ -1,9 +1,9 @@
 package org.tritonkor.controlabackend.task.service;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.tritonkor.controlabackend.project.dto.ProjectResponse;
 import org.tritonkor.controlabackend.project.entity.Project;
 import org.tritonkor.controlabackend.project.repository.ProjectRepository;
 import org.tritonkor.controlabackend.task.dto.CreateTaskRequest;
@@ -12,13 +12,19 @@ import org.tritonkor.controlabackend.task.entity.Task;
 import org.tritonkor.controlabackend.task.entity.TaskStatus;
 import org.tritonkor.controlabackend.task.repository.TaskRepository;
 
-import java.util.Base64;
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.List;
 import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
 public class TaskService {
+
+    @Value("${file.upload.dir:./uploads}")
+    private String uploadDir;
 
     private final TaskRepository taskRepository;
     private final ProjectRepository projectRepository;
@@ -30,7 +36,7 @@ public class TaskService {
     }
 
     @Transactional
-    public TaskResponse createTask(CreateTaskRequest request) {
+    public TaskResponse createTask(CreateTaskRequest request) throws IOException {
         Project project = projectRepository.findById(request.projectId())
                 .orElseThrow(() -> new RuntimeException("Проект з ID " + request.projectId() + " не знайдено"));
 
@@ -39,10 +45,10 @@ public class TaskService {
         task.setDescription(request.description());
         task.setStatus(request.status());
         task.setProject(project);
-        if (request.attachments() != null && !request.attachments().isEmpty()) {
-            task.setAttachments(request.attachments().getBytes());
-        } else {
-            task.setAttachments(null);
+
+        if (request.attachment() != null && !request.attachment().isEmpty()) {
+            String attachmentUrl = saveFile(request.attachment());
+            task.setAttachmentUrl(attachmentUrl);
         }
 
         return toResponse(taskRepository.save(task));
@@ -65,6 +71,19 @@ public class TaskService {
                 .toList();
     }
 
+    private String saveFile(org.springframework.web.multipart.MultipartFile file) throws IOException {
+        File uploadDirectory = new File(uploadDir);
+        if (!uploadDirectory.exists()) {
+            uploadDirectory.mkdirs();
+        }
+
+        String fileName = UUID.randomUUID() + "_" + file.getOriginalFilename();
+        String filePath = Paths.get(uploadDir, fileName).toString();
+        Files.write(Paths.get(filePath), file.getBytes());
+
+        return "/api/tasks/files/" + fileName;
+    }
+
     private TaskResponse toResponse(Task task) {
         TaskResponse.ProjectShortResponse projectResponse = new TaskResponse.ProjectShortResponse(
                 task.getProject().getId().toString(),
@@ -77,20 +96,15 @@ public class TaskService {
                         employee.getFirstName(),
                         employee.getLastName(),
                         employee.getPosition().toString(),
-                        employee.getDepartment().getTitle()
+                        employee.getDepartment() != null ? employee.getDepartment().getTitle() : null
                 ))
                 .toList();
-
-        String attachmentsString = null;
-        if (task.getAttachments() != null) {
-            attachmentsString = Base64.getEncoder().encodeToString(task.getAttachments());
-        }
 
         return new TaskResponse(
                 task.getId(),
                 task.getTitle(),
                 task.getDescription(),
-                attachmentsString,
+                task.getAttachmentUrl(),
                 task.getStatus().toString(),
                 projectResponse,
                 assignees

@@ -10,6 +10,7 @@ spring:
 
     open-in-view: false
 
+
 server:
   port: 8080
 
@@ -17,3 +18,8 @@ jwt:
   secret: "FNKDdSnAUGYv98FNuAge0kGSZ9xG4otqjMch7d7HVcp"
   access-expiration-ms: 900000
   refresh-expiration-ms: 604800000
+
+file:
+  upload:
+    dir: ./uploads
+

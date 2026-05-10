@@ -7,7 +7,7 @@ public record TaskResponse(
         UUID id,
         String title,
         String description,
-        String attachments,
+        String attachmentUrl,
         String status,
         ProjectShortResponse project,
         List<EmployeeShortResponse> assignees

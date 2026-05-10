@@ -3,6 +3,7 @@ package org.tritonkor.controlabackend.task.dto;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
+import org.springframework.web.multipart.MultipartFile;
 import org.tritonkor.controlabackend.task.entity.TaskStatus;
 
 import java.util.UUID;
@@ -22,6 +23,6 @@ public record CreateTaskRequest(
         @NotNull(message = "ID проекту не може бути null")
         UUID projectId,
 
-        String attachments
+        MultipartFile attachment
 ) {
 }

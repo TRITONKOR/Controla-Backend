@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 import org.tritonkor.controlabackend.project.entity.Project;
 import org.tritonkor.controlabackend.project.repository.ProjectRepository;
 import org.tritonkor.controlabackend.task.dto.CreateTaskRequest;
@@ -71,17 +72,19 @@ public class TaskService {
                 .toList();
     }
 
-    private String saveFile(org.springframework.web.multipart.MultipartFile file) throws IOException {
+    private String saveFile(MultipartFile file) throws IOException {
+
         File uploadDirectory = new File(uploadDir);
+
         if (!uploadDirectory.exists()) {
             uploadDirectory.mkdirs();
         }
 
         String fileName = UUID.randomUUID() + "_" + file.getOriginalFilename();
         String filePath = Paths.get(uploadDir, fileName).toString();
-        Files.write(Paths.get(filePath), file.getBytes());
+        file.transferTo(Paths.get(filePath));
 
-        return "/api/tasks/files/" + fileName;
+        return "/tasks/files/" + fileName;
     }
 
     private TaskResponse toResponse(Task task) {

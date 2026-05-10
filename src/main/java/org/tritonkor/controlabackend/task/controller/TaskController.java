@@ -74,10 +74,17 @@ public class TaskController {
 
         Resource resource = new FileSystemResource(filePath);
         String contentType = Files.probeContentType(filePath);
+        String encodedFilename = java.net.URLEncoder.encode(resource.getFilename(), java.nio.charset.StandardCharsets.UTF_8)
+                .replace("+", "%20");
 
         return ResponseEntity.ok()
-                .contentType(MediaType.parseMediaType(contentType != null ? contentType : MediaType.APPLICATION_OCTET_STREAM_VALUE))
-                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + filename + "\"")
+                .contentType(MediaType.parseMediaType(
+                        contentType != null ? contentType : MediaType.APPLICATION_OCTET_STREAM_VALUE
+                ))
+                .header(
+                        HttpHeaders.CONTENT_DISPOSITION,
+                        "attachment; filename=\"" + resource.getFilename() + "\"; filename*=UTF-8''" + encodedFilename
+                )
                 .body(resource);
     }
 }

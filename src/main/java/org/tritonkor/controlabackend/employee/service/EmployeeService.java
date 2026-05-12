@@ -64,7 +64,6 @@ public class EmployeeService {
                 employee.getId(),
                 employee.getFirstName(),
                 employee.getLastName(),
-                employee.getPosition() != null ? employee.getPosition().toString() : null,
                 employee.getUser() != null && employee.getUser().getAvatar() != null
                 ? Base64.getEncoder().encodeToString(employee.getUser().getAvatar())
                 : null,

@@ -20,9 +20,9 @@ public record TaskResponse(
 
     public record EmployeeShortResponse(
             String id,
+            String userId,
             String firstName,
             String lastName,
-            String position,
             String departmentTitle
     ) {}
 }

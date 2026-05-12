@@ -27,6 +27,7 @@ public record ProjectResponse (
 
     public record EmployeeShortResponse(
             String id,
+            String userId,
             String firstName,
             String lastName,
             String departmentTitle

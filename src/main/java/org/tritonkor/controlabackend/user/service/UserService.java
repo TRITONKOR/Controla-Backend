@@ -107,7 +107,6 @@ public class UserService implements org.springframework.security.core.userdetail
 
         if (request.firstName() != null) employee.setFirstName(request.firstName());
         if (request.lastName() != null) employee.setLastName(request.lastName());
-        if (request.position() != null) employee.setPosition(request.position());
 
         if (request.departmentId() != null) {
             Department department = departmentRepository.findById(request.departmentId())

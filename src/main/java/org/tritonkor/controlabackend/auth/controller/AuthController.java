@@ -56,7 +56,7 @@ public class AuthController {
 
         Cookie cookie = new Cookie(REFRESH_TOKEN_COOKIE, refreshToken);
         cookie.setHttpOnly(true);
-        cookie.setSecure(false);
+        cookie.setSecure(true);
         cookie.setPath("/api/auth");
         cookie.setMaxAge(7 * 24 * 60 * 60);
         response.addCookie(cookie);
@@ -75,7 +75,7 @@ public class AuthController {
         }
         try {
             if (tokenBlacklistService.isBlacklisted(refreshToken)) {
-                clearRefreshCookie(response); // <- додай тут
+                clearRefreshCookie(response);
                 throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Refresh token has been revoked");
             }
 
@@ -84,6 +84,7 @@ public class AuthController {
                     .orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Invalid refresh token"));
 
             if (!jwtService.isRefreshTokenValid(refreshToken, user)) {
+                clearRefreshCookie(response);
                 throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Invalid refresh token");
             }
 
@@ -94,7 +95,7 @@ public class AuthController {
 
             Cookie cookie = new Cookie(REFRESH_TOKEN_COOKIE, newRefreshToken);
             cookie.setHttpOnly(true);
-            cookie.setSecure(false);
+            cookie.setSecure(true);
             cookie.setPath("/api/auth");
             cookie.setMaxAge(7 * 24 * 60 * 60);
             response.addCookie(cookie);
@@ -127,7 +128,7 @@ public class AuthController {
 
         Cookie cookie = new Cookie(REFRESH_TOKEN_COOKIE, "");
         cookie.setHttpOnly(true);
-        cookie.setSecure(false);
+        cookie.setSecure(true);
         cookie.setPath("/api/auth");
         cookie.setMaxAge(0);
         response.addCookie(cookie);
@@ -152,7 +153,6 @@ public class AuthController {
         Employee employee = new Employee();
         employee.setFirstName(request.firstName());
         employee.setLastName(request.lastName());
-        employee.setPosition(null);
         employee.setDepartment(null);
         employee.setUser(user);
 
@@ -188,7 +188,7 @@ public class AuthController {
     private void clearRefreshCookie(HttpServletResponse response) {
         Cookie cookie = new Cookie(REFRESH_TOKEN_COOKIE, "");
         cookie.setHttpOnly(true);
-        cookie.setSecure(false);
+        cookie.setSecure(true);
         cookie.setPath("/api/auth");
         cookie.setMaxAge(0);
         response.addCookie(cookie);

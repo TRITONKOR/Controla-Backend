@@ -18,7 +18,7 @@ import java.util.Set;
 @NoArgsConstructor
 public class Task extends AuditableEntity {
 
-    @Column(unique = true, nullable = false)
+    @Column(nullable = false)
     private String title;
 
     @Column(nullable = false, length = 1000)

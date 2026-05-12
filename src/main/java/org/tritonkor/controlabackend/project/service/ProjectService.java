@@ -20,7 +20,6 @@ import org.tritonkor.controlabackend.user.entity.Role;
 
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.tritonkor.controlabackend.user.entity.User;
 
 import java.util.List;
 import java.util.UUID;
@@ -148,6 +147,7 @@ public class ProjectService {
 
         return new ProjectResponse.EmployeeShortResponse(
                 employee.getId().toString(),
+                employee.getUser().getId().toString(),
                 employee.getFirstName(),
                 employee.getLastName(),
                 departmentTitle

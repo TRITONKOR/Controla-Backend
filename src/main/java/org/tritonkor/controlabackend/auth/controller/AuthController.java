@@ -70,11 +70,12 @@ public class AuthController {
             HttpServletResponse response) {
 
         if (refreshToken == null || refreshToken.isBlank()) {
+            clearRefreshCookie(response);
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Refresh token is missing");
         }
-
         try {
             if (tokenBlacklistService.isBlacklisted(refreshToken)) {
+                clearRefreshCookie(response); // <- додай тут
                 throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Refresh token has been revoked");
             }
 
@@ -100,6 +101,7 @@ public class AuthController {
 
             return buildAuthResponse(newAccessToken, user);
         } catch (JwtException | IllegalArgumentException ex) {
+            clearRefreshCookie(response);
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Invalid refresh token");
         }
     }
@@ -181,5 +183,14 @@ public class AuthController {
                         user.getUpdatedAt()
                 )
         );
+    }
+
+    private void clearRefreshCookie(HttpServletResponse response) {
+        Cookie cookie = new Cookie(REFRESH_TOKEN_COOKIE, "");
+        cookie.setHttpOnly(true);
+        cookie.setSecure(false);
+        cookie.setPath("/api/auth");
+        cookie.setMaxAge(0);
+        response.addCookie(cookie);
     }
 }

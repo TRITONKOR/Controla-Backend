@@ -2,6 +2,8 @@ package org.tritonkor.controlabackend.project.controller;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 import org.tritonkor.controlabackend.employee.dto.EmployeeResponse;
@@ -41,5 +43,12 @@ public class ProjectController {
         } catch (Exception e) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage());
         }
+    }
+
+    @PreAuthorize("hasRole('ADMIN')")
+    @DeleteMapping("/{projectId}")
+    public ResponseEntity<Void> deleteProject(@PathVariable UUID projectId) {
+        projectService.deleteProject(projectId);
+        return  ResponseEntity.noContent().build();
     }
 }

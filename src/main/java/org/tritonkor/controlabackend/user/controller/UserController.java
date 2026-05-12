@@ -3,6 +3,7 @@ package org.tritonkor.controlabackend.user.controller;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import org.tritonkor.controlabackend.project.dto.ProjectResponse;
@@ -22,6 +23,12 @@ public class UserController {
 
     private final UserService userService;
     private final ProjectService projectService;
+
+    @GetMapping
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<List<UserDetailedResponse>> getAll() {
+        return ResponseEntity.ok(userService.getAll());
+    }
 
     @GetMapping("/{userId}/status")
     public ResponseEntity<UserStatusResponse> getUserStatus(@PathVariable UUID userId) {
@@ -50,5 +57,13 @@ public class UserController {
             @PathVariable UUID userId,
             @RequestParam("avatar") MultipartFile avatar) {
         return ResponseEntity.ok(userService.updateAvatar(userId, avatar));
+    }
+
+    @PreAuthorize("hasRole('ADMIN')")
+    @DeleteMapping("/{userId}")
+    public ResponseEntity<Void> deleteUser(@PathVariable UUID userId) {
+        userService.deleteUser(userId);
+
+        return ResponseEntity.noContent().build();
     }
 }

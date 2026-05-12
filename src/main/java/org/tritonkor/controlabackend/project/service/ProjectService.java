@@ -15,6 +15,7 @@ import org.tritonkor.controlabackend.project.dto.ProjectResponse;
 import org.tritonkor.controlabackend.project.entity.Project;
 import org.tritonkor.controlabackend.project.repository.ProjectRepository;
 import org.tritonkor.controlabackend.task.entity.Task;
+import org.tritonkor.controlabackend.task.repository.TaskRepository;
 import org.tritonkor.controlabackend.user.entity.Role;
 
 import org.springframework.security.core.Authentication;
@@ -32,6 +33,7 @@ public class ProjectService {
 
     private final ProjectRepository projectRepository;
     private final EmployeeRepository employeeRepository;
+    private final TaskRepository taskRepository;
 
     @Transactional(readOnly = true)
     public List<ProjectResponse> getAllProjects() {
@@ -84,6 +86,22 @@ public class ProjectService {
 
 
         return toResponse(projectRepository.save(project));
+    }
+
+    @Transactional
+    public void deleteProject(UUID projectId) {
+        Project project = projectRepository.findById(projectId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Project not found"));
+
+        for (Task task : project.getTasks()) {
+            task.getAssignees().clear();
+            taskRepository.save(task);
+        }
+
+        project.getAssignees().clear();
+        projectRepository.save(project);
+
+        projectRepository.delete(project);
     }
 
     private ProjectResponse toResponse(Project project) {

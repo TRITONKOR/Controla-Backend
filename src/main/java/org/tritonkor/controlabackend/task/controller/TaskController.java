@@ -33,6 +33,11 @@ public class TaskController {
 
     private final TaskService taskService;
 
+    @GetMapping("/user/{userId}")
+    public ResponseEntity<List<TaskResponse>> getAllUserTasks(@PathVariable UUID userId) {
+        return ResponseEntity.ok(taskService.getTasksByUser(userId));
+    }
+
     @GetMapping("/project/{projectId}")
     public List<TaskResponse> getAllTasksByProjectId(@PathVariable UUID projectId) {
         return taskService.getTasksByProject(projectId);

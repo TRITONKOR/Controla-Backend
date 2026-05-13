@@ -9,8 +9,9 @@ public record EmployeeResponse(
         String avatar,
         UUID departmentId,
         String departmentTitle,
-        int projectsCount,
-        int tasksCount,
-        int doneTasksCount
+        Long projectsCount,
+        Double productivity,
+        Long assignedTasksLastMonth,
+        Long completedTasksLastMonth
 ) {
 }

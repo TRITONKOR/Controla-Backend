@@ -9,7 +9,11 @@ import org.tritonkor.controlabackend.employee.repository.EmployeeRepository;
 import org.tritonkor.controlabackend.project.entity.Project;
 import org.tritonkor.controlabackend.project.repository.ProjectRepository;
 import org.tritonkor.controlabackend.task.entity.TaskStatus;
+import org.tritonkor.controlabackend.task.repository.TaskRepository;
 
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.Base64;
 import java.util.List;
 import java.util.Objects;
@@ -21,6 +25,7 @@ public class EmployeeService {
 
     private final EmployeeRepository employeeRepository;
     private final ProjectRepository projectRepository;
+    private final TaskRepository taskRepository;
 
     @Transactional(readOnly = true)
     public List<EmployeeResponse> getAllEmployees() {
@@ -42,37 +47,35 @@ public class EmployeeService {
         UUID employeeId = employee.getId();
         List<Project> projects = projectRepository.findAll();
 
-        int projectsCount = (int) projects.stream()
+        long projectsCount = projects.stream()
                 .filter(project ->
                         (project.getOwner() != null && Objects.equals(project.getOwner().getId(), employeeId))
                                 || project.getAssignees().stream().anyMatch(assignee -> Objects.equals(assignee.getId(), employeeId))
                 )
                 .count();
 
-        int tasksCount = (int) projects.stream()
-                .flatMap(project -> project.getTasks().stream())
-                .filter(task -> task.getAssignees().stream().anyMatch(assignee -> Objects.equals(assignee.getId(), employeeId)))
-                .count();
+        LocalDateTime now = LocalDateTime.now();
+        LocalDateTime oneMonthAgo = now.minusDays(30);
 
-        int doneTaskCount = (int) projects.stream()
-                .flatMap(project -> project.getTasks().stream())
-                .filter(task -> task.getAssignees().stream().anyMatch(assignee -> Objects.equals(assignee.getId(), employeeId)))
-                .filter(task -> task.getStatus() == TaskStatus.DONE)
-                .count();
+        long assignedTasks = taskRepository.countAssignedTasksInPeriod(employee, oneMonthAgo, now);
+        long completedTasks = taskRepository.countCompletedTasksInPeriod(employee, TaskStatus.DONE, oneMonthAgo, now);
+        double productivity = assignedTasks > 0 ? (completedTasks * 100.0) / assignedTasks : 0.0;
+
+        String avatarBase64 = employee.getUser() != null && employee.getUser().getAvatar() != null
+                ? Base64.getEncoder().encodeToString(employee.getUser().getAvatar())
+                : null;
 
         return new EmployeeResponse(
                 employee.getId(),
                 employee.getFirstName(),
                 employee.getLastName(),
-                employee.getUser() != null && employee.getUser().getAvatar() != null
-                ? Base64.getEncoder().encodeToString(employee.getUser().getAvatar())
-                : null,
+                avatarBase64,
                 employee.getDepartment() != null ? employee.getDepartment().getId() : null,
                 employee.getDepartment() != null ? employee.getDepartment().getTitle() : null,
-
                 projectsCount,
-                tasksCount,
-                doneTaskCount
+                Math.round(productivity * 100.0) / 100.0,
+                assignedTasks,
+                completedTasks
         );
     }
 }

@@ -26,7 +26,6 @@ import java.util.UUID;
 @Service
 @RequiredArgsConstructor
 public class TaskService {
-
     @Value("${file.upload.dir:./uploads}")
     private String uploadDir;
 
@@ -66,6 +65,18 @@ public class TaskService {
 
         task.setStatus(TaskStatus.valueOf(newStatus.toUpperCase()));
         return toResponse(taskRepository.save(task));
+    }
+
+    @Transactional(readOnly = true)
+    public List<TaskResponse> getTasksByUser(UUID userId) {
+        Employee employee = employeeRepository.findByUserId(userId)
+                .orElseThrow(() -> new RuntimeException("Співробітник з User ID " + userId + " не знайдено"));
+
+        return taskRepository.findByAssigneesContaining(employee)
+                .stream()
+                .filter(task -> task.getStatus() != TaskStatus.DONE)
+                .map(this::toResponse)
+                .toList();
     }
 
     @Transactional(readOnly = true)

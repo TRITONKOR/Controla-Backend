@@ -1,6 +1,7 @@
 package org.tritonkor.controlabackend.project.controller;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.repository.query.Param;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -9,6 +10,7 @@ import org.springframework.web.server.ResponseStatusException;
 import org.tritonkor.controlabackend.employee.dto.EmployeeResponse;
 import org.tritonkor.controlabackend.project.dto.CreateProjectRequest;
 import org.tritonkor.controlabackend.project.dto.ProjectResponse;
+import org.tritonkor.controlabackend.project.dto.ReportResponse;
 import org.tritonkor.controlabackend.project.service.ProjectService;
 
 import java.util.List;
@@ -50,5 +52,10 @@ public class ProjectController {
     public ResponseEntity<Void> deleteProject(@PathVariable UUID projectId) {
         projectService.deleteProject(projectId);
         return  ResponseEntity.noContent().build();
+    }
+
+    @PostMapping("/{projectId}/report")
+    public ResponseEntity<ReportResponse> createProjectReport(@PathVariable UUID projectId) {
+        return ResponseEntity.ok(projectService.createProjectReport(projectId));
     }
 }

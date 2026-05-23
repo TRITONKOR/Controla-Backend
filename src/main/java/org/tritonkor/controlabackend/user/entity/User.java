@@ -4,13 +4,11 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import org.hibernate.annotations.JdbcTypeCode;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.tritonkor.controlabackend.common.entity.AuditableEntity;
 
-import java.sql.Types;
 import java.util.Collection;
 import java.util.List;
 
@@ -32,9 +30,8 @@ public class User extends AuditableEntity implements UserDetails {
     private Boolean isApproved = false;
     private Boolean isActive = true;
 
-    @JdbcTypeCode(Types.BINARY)
-    @Column(name = "avatar", columnDefinition = "BYTEA")
-    private byte[] avatar;
+    @Column(name = "avatar")
+    private String avatar;
 
     public User(String email, String hashPassword, Role role) {
         this.email = email;

@@ -11,10 +11,7 @@ import org.tritonkor.controlabackend.project.repository.ProjectRepository;
 import org.tritonkor.controlabackend.task.entity.TaskStatus;
 import org.tritonkor.controlabackend.task.repository.TaskRepository;
 
-import java.time.Instant;
 import java.time.LocalDateTime;
-import java.time.temporal.ChronoUnit;
-import java.util.Base64;
 import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
@@ -61,15 +58,15 @@ public class EmployeeService {
         long completedTasks = taskRepository.countCompletedTasksInPeriod(employee, TaskStatus.DONE, oneMonthAgo, now);
         double productivity = assignedTasks > 0 ? (completedTasks * 100.0) / assignedTasks : 0.0;
 
-        String avatarBase64 = employee.getUser() != null && employee.getUser().getAvatar() != null
-                ? Base64.getEncoder().encodeToString(employee.getUser().getAvatar())
+        String avatarUrl = employee.getUser() != null
+                ? employee.getUser().getAvatar()
                 : null;
 
         return new EmployeeResponse(
                 employee.getId(),
                 employee.getFirstName(),
                 employee.getLastName(),
-                avatarBase64,
+                avatarUrl,
                 employee.getDepartment() != null ? employee.getDepartment().getId() : null,
                 employee.getDepartment() != null ? employee.getDepartment().getTitle() : null,
                 projectsCount,

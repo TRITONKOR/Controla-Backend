@@ -1,11 +1,9 @@
 package org.tritonkor.controlabackend.user.controller;
 
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.multipart.MultipartFile;
 import org.tritonkor.controlabackend.project.dto.ProjectResponse;
 import org.tritonkor.controlabackend.project.service.ProjectService;
 import org.tritonkor.controlabackend.user.dto.UpdateUserRequest;
@@ -52,12 +50,6 @@ public class UserController {
         return ResponseEntity.ok(userService.updateUser(userId, request));
     }
 
-    @PatchMapping(value = "/{userId}/avatar", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ResponseEntity<UserDetailedResponse> uploadAvatar(
-            @PathVariable UUID userId,
-            @RequestParam("avatar") MultipartFile avatar) {
-        return ResponseEntity.ok(userService.updateAvatar(userId, avatar));
-    }
 
     @PreAuthorize("hasRole('ADMIN')")
     @DeleteMapping("/{userId}")

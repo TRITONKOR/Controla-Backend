@@ -10,6 +10,7 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
 import org.tritonkor.controlabackend.auth.dto.AuthResponse;
 import org.tritonkor.controlabackend.auth.dto.LoginRequest;
 import org.tritonkor.controlabackend.auth.dto.RegisterRequest;
@@ -20,9 +21,6 @@ import org.tritonkor.controlabackend.employee.repository.EmployeeRepository;
 import org.tritonkor.controlabackend.user.entity.Role;
 import org.tritonkor.controlabackend.user.entity.User;
 import org.tritonkor.controlabackend.user.repository.UserRepository;
-import org.springframework.web.server.ResponseStatusException;
-
-import java.util.Base64;
 
 @RestController
 @RequestMapping("/api/auth")
@@ -117,13 +115,15 @@ public class AuthController {
             String accessToken = authHeader.substring(7);
             try {
                 tokenBlacklistService.blacklist(accessToken, jwtService.extractExpiration(accessToken));
-            } catch (Exception ignored) {}
+            } catch (Exception ignored) {
+            }
         }
 
         if (refreshToken != null && !refreshToken.isBlank()) {
             try {
                 tokenBlacklistService.blacklist(refreshToken, jwtService.extractExpiration(refreshToken));
-            } catch (Exception ignored) {}
+            } catch (Exception ignored) {
+            }
         }
 
         Cookie cookie = new Cookie(REFRESH_TOKEN_COOKIE, "");
@@ -165,10 +165,6 @@ public class AuthController {
         Employee employee = employeeRepository.findByUser(user)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Employee profile not found"));
 
-        String avatarBase64 = user.getAvatar() == null
-                ? null
-                : Base64.getEncoder().encodeToString(user.getAvatar());
-
         return new AuthResponse(
                 accessToken,
                 new AuthResponse.AuthUser(
@@ -177,7 +173,7 @@ public class AuthController {
                         employee.getFirstName(),
                         employee.getLastName(),
                         user.getRole().name(),
-                        avatarBase64,
+                        user.getAvatar(),
                         user.getIsActive(),
                         user.getCreatedAt(),
                         user.getUpdatedAt()

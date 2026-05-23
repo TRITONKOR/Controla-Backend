@@ -17,19 +17,13 @@ import org.tritonkor.controlabackend.task.entity.Task;
 import org.tritonkor.controlabackend.task.repository.TaskRepository;
 import org.tritonkor.controlabackend.user.dto.UpdateUserRequest;
 import org.tritonkor.controlabackend.user.dto.UserDetailedResponse;
-import org.tritonkor.controlabackend.user.dto.UserResponse;
 import org.tritonkor.controlabackend.user.dto.UserStatusResponse;
 import org.tritonkor.controlabackend.user.entity.Role;
 import org.tritonkor.controlabackend.user.entity.User;
 import org.tritonkor.controlabackend.user.repository.UserRepository;
 
-import java.util.Base64;
 import java.util.List;
 import java.util.UUID;
-
-import org.springframework.web.multipart.MultipartFile;
-
-import java.io.IOException;
 
 @Service
 @RequiredArgsConstructor
@@ -114,6 +108,13 @@ public class UserService implements org.springframework.security.core.userdetail
             employee.setDepartment(department);
         }
 
+        if (request.avatar() != null) {
+            if (request.avatar().isBlank()) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Avatar URL must not be blank");
+            }
+            user.setAvatar(request.avatar().trim());
+        }
+
         employeeRepository.save(employee);
         userRepository.save(user);
 
@@ -127,9 +128,6 @@ public class UserService implements org.springframework.security.core.userdetail
 
         user.setIsApproved(true);
         userRepository.save(user);
-
-        Employee employee = employeeRepository.findByUser(user)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Employee not found"));
 
         return toStatusResponse(user);
     }
@@ -161,29 +159,7 @@ public class UserService implements org.springframework.security.core.userdetail
         userRepository.delete(user);
     }
 
-    @Transactional
-    public UserDetailedResponse updateAvatar(UUID userId, MultipartFile avatar) {
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
-        try {
-            user.setAvatar(avatar.getBytes());
-        } catch (IOException e) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Failed to read avatar file");
-        }
-
-        userRepository.save(user);
-
-        Employee employee = employeeRepository.findByUser(user)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Employee not found"));
-
-        return toDetailedResponse(user, employee);
-    }
-
     private UserDetailedResponse toDetailedResponse(User user, Employee employee) {
-        String avatarBase64 = user.getAvatar() != null
-                ? Base64.getEncoder().encodeToString(user.getAvatar())
-                : null;
-
         return new UserDetailedResponse(
                 user.getId(),
                 employee.getFirstName(),
@@ -192,7 +168,7 @@ public class UserService implements org.springframework.security.core.userdetail
                 user.getRole(),
                 user.getIsApproved(),
                 user.getIsActive(),
-                avatarBase64,
+                user.getAvatar(),
                 user.getCreatedAt()
         );
     }

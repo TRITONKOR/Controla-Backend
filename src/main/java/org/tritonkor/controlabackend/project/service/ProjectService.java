@@ -2,8 +2,9 @@ package org.tritonkor.controlabackend.project.service;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
-import java.util.Base64;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 import org.tritonkor.controlabackend.employee.dto.EmployeeResponse;
@@ -21,9 +22,6 @@ import org.tritonkor.controlabackend.task.entity.TaskStatus;
 import org.tritonkor.controlabackend.task.repository.TaskRepository;
 import org.tritonkor.controlabackend.user.entity.Role;
 
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
-
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.EnumMap;
@@ -36,7 +34,6 @@ import java.util.UUID;
 public class ProjectService {
 
     private final EmployeeService employeeService;
-
     private final ProjectRepository projectRepository;
     private final EmployeeRepository employeeRepository;
     private final TaskRepository taskRepository;
@@ -71,7 +68,6 @@ public class ProjectService {
 
     @Transactional
     public ProjectResponse createProject(CreateProjectRequest request) {
-
         String email = getCurrentUserEmail();
 
         Employee owner = employeeRepository.findByUserEmail(email)
@@ -81,7 +77,6 @@ public class ProjectService {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Only managers can create projects");
         }
 
-
         Project project = new Project(
                 request.title(),
                 request.description(),
@@ -89,7 +84,6 @@ public class ProjectService {
                 request.deadline(),
                 owner
         );
-
 
         return toResponse(projectRepository.save(project));
     }
@@ -212,8 +206,9 @@ public class ProjectService {
                 project.getDescription(),
                 project.getOwner() != null ? project.getOwner().getId() : null,
                 project.getOwner() != null ? project.getOwner().getFirstName() : null,
-                project.getOwner() != null ? project.getOwner().getLastName() : null,                project.getOwner() != null && project.getOwner().getUser().getAvatar() != null
-                        ? Base64.getEncoder().encodeToString(project.getOwner().getUser().getAvatar())
+                project.getOwner() != null ? project.getOwner().getLastName() : null,
+                project.getOwner() != null && project.getOwner().getUser() != null
+                        ? project.getOwner().getUser().getAvatar()
                         : null,
                 project.getStatus() != null ? project.getStatus().name() : null,
                 project.getCosts(),

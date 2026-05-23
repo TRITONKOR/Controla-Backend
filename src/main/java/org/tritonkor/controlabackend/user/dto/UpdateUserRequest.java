@@ -5,6 +5,7 @@ import java.util.UUID;
 public record UpdateUserRequest(
         String firstName,
         String lastName,
-        UUID departmentId
+        UUID departmentId,
+        String avatar
 ) {}
 

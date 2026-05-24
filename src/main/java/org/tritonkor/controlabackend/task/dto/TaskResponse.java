@@ -8,6 +8,7 @@ public record TaskResponse(
         String title,
         String description,
         String attachmentUrl,
+        String attachmentName,
         String status,
         ProjectShortResponse project,
         List<EmployeeShortResponse> assignees

@@ -23,6 +23,7 @@ public record CreateTaskRequest(
         @NotNull(message = "ID проекту не може бути null")
         UUID projectId,
 
-        MultipartFile attachment
+        String attachmentUrl,
+        String attachmentName
 ) {
 }

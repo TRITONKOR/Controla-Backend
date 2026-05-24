@@ -13,21 +13,19 @@ import org.tritonkor.controlabackend.project.entity.Project;
 import org.tritonkor.controlabackend.project.repository.ProjectRepository;
 import org.tritonkor.controlabackend.task.dto.CreateTaskRequest;
 import org.tritonkor.controlabackend.task.dto.TaskResponse;
+import org.tritonkor.controlabackend.task.dto.UpdateTaskRequest;
 import org.tritonkor.controlabackend.task.entity.Task;
 import org.tritonkor.controlabackend.task.entity.TaskStatus;
 import org.tritonkor.controlabackend.task.repository.TaskRepository;
 
-import java.io.File;
 import java.io.IOException;
-import java.nio.file.Paths;
 import java.util.List;
+import java.util.Objects;
 import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
 public class TaskService {
-    @Value("${file.upload.dir:./uploads}")
-    private String uploadDir;
 
     private final TaskRepository taskRepository;
     private final ProjectRepository projectRepository;
@@ -40,7 +38,7 @@ public class TaskService {
     }
 
     @Transactional
-    public TaskResponse createTask(CreateTaskRequest request) throws IOException {
+    public TaskResponse createTask(CreateTaskRequest request) {
         Project project = projectRepository.findById(request.projectId())
                 .orElseThrow(() -> new RuntimeException("Проект з ID " + request.projectId() + " не знайдено"));
 
@@ -49,11 +47,23 @@ public class TaskService {
         task.setDescription(request.description());
         task.setStatus(request.status());
         task.setProject(project);
+        task.setAttachmentUrl(request.attachmentUrl());
+        task.setAttachmentName(request.attachmentName());
 
-        if (request.attachment() != null && !request.attachment().isEmpty()) {
-            String attachmentUrl = saveFile(request.attachment());
-            task.setAttachmentUrl(attachmentUrl);
-        }
+
+        return toResponse(taskRepository.save(task));
+    }
+
+    @Transactional
+    public TaskResponse updateTask(UUID task_id, UpdateTaskRequest request) {
+        Task task = taskRepository.findById(task_id)
+                .orElseThrow(() -> new RuntimeException("Завдання з ID " + task_id + " не знайдено"));
+
+        if (request.title() != null) task.setTitle(request.title());
+        if (request.description() != null) task.setTitle(request.description());
+        if (request.status() != null) task.setTitle(String.valueOf(request.status()));
+        if (request.attachmentUrl() != null) task.setAttachmentUrl(request.attachmentUrl());
+        if (request.attachmentName() != null) task.setAttachmentName(request.attachmentName());
 
         return toResponse(taskRepository.save(task));
     }
@@ -85,20 +95,6 @@ public class TaskService {
                 .stream()
                 .map(this::toResponse)
                 .toList();
-    }
-
-    private String saveFile(MultipartFile file) throws IOException {
-        File uploadDirectory = new File(uploadDir);
-
-        if (!uploadDirectory.exists()) {
-            uploadDirectory.mkdirs();
-        }
-
-        String fileName = UUID.randomUUID() + "_" + file.getOriginalFilename();
-        String filePath = Paths.get(uploadDir, fileName).toString();
-        file.transferTo(Paths.get(filePath));
-
-        return "/tasks/files/" + fileName;
     }
 
     @Transactional
@@ -186,6 +182,7 @@ public class TaskService {
                 task.getTitle(),
                 task.getDescription(),
                 task.getAttachmentUrl(),
+                task.getAttachmentName(),
                 task.getStatus().toString(),
                 projectResponse,
                 assignees

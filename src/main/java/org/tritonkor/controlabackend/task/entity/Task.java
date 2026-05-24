@@ -26,6 +26,8 @@ public class Task extends AuditableEntity {
 
     @Column(name = "attachment_url")
     private String attachmentUrl;
+    @Column(name = "attachment_name")
+    private String attachmentName;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "project_id",nullable = false)

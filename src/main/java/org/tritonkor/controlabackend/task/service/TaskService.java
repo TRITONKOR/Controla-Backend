@@ -60,8 +60,8 @@ public class TaskService {
                 .orElseThrow(() -> new RuntimeException("Завдання з ID " + task_id + " не знайдено"));
 
         if (request.title() != null) task.setTitle(request.title());
-        if (request.description() != null) task.setTitle(request.description());
-        if (request.status() != null) task.setTitle(String.valueOf(request.status()));
+        if (request.description() != null) task.setDescription(request.description());
+        if (request.status() != null) task.setStatus(request.status());
         if (request.attachmentUrl() != null) task.setAttachmentUrl(request.attachmentUrl());
         if (request.attachmentName() != null) task.setAttachmentName(request.attachmentName());
 

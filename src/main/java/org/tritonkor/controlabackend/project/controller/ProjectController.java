@@ -12,6 +12,7 @@ import org.tritonkor.controlabackend.project.dto.CreateProjectRequest;
 import org.tritonkor.controlabackend.project.dto.ProjectResponse;
 import org.tritonkor.controlabackend.project.dto.ReportResponse;
 import org.tritonkor.controlabackend.project.service.ProjectService;
+import org.tritonkor.controlabackend.task.dto.TaskResponse;
 
 import java.util.List;
 import java.util.UUID;
@@ -45,6 +46,22 @@ public class ProjectController {
         } catch (Exception e) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage());
         }
+    }
+
+    @PostMapping("/{projectId}/assignees/{employeeId}")
+    public ResponseEntity<ProjectResponse> assignEmployee(
+            @PathVariable UUID projectId,
+            @PathVariable UUID employeeId
+    ) {
+        return ResponseEntity.ok(projectService.assignEmployee(projectId, employeeId));
+    }
+
+    @DeleteMapping("/{projectId}/assignees/{employeeId}")
+    public ResponseEntity<ProjectResponse> removeAssignee(
+            @PathVariable UUID projectId,
+            @PathVariable UUID employeeId
+    ) {
+        return ResponseEntity.ok(projectService.removeAssignee(projectId, employeeId));
     }
 
     @PreAuthorize("hasRole('ADMIN')")

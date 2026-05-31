@@ -62,20 +62,20 @@ public class TaskController {
         }
     }
 
-    @PostMapping("/{taskId}/assignees/{userId}")
-    public ResponseEntity<TaskResponse> assignUser(
+    @PostMapping("/{taskId}/assignees/{employeeId}")
+    public ResponseEntity<TaskResponse> assignEmployee(
             @PathVariable UUID taskId,
-            @PathVariable UUID userId
+            @PathVariable UUID employeeId
     ) {
-        return ResponseEntity.ok(taskService.assignUserToTask(taskId, userId));
+        return ResponseEntity.ok(taskService.assignEmployeeToTask(taskId, employeeId));
     }
 
-    @DeleteMapping("/{taskId}/assignees/{userId}")
+    @DeleteMapping("/{taskId}/assignees/{employeeId}")
     public ResponseEntity<TaskResponse> removeAssignee(
             @PathVariable UUID taskId,
-            @PathVariable UUID userId
+            @PathVariable UUID employeeId
     ) {
-        return ResponseEntity.ok(taskService.removeAssignee(taskId, userId));
+        return ResponseEntity.ok(taskService.removeAssignee(taskId, employeeId));
     }
 
     @PatchMapping("/{taskId}/status")

@@ -17,6 +17,7 @@ import org.tritonkor.controlabackend.project.dto.ReportResponse;
 import org.tritonkor.controlabackend.project.entity.Project;
 import org.tritonkor.controlabackend.project.entity.RiskLevel;
 import org.tritonkor.controlabackend.project.repository.ProjectRepository;
+import org.tritonkor.controlabackend.task.dto.TaskResponse;
 import org.tritonkor.controlabackend.task.entity.Task;
 import org.tritonkor.controlabackend.task.entity.TaskStatus;
 import org.tritonkor.controlabackend.task.repository.TaskRepository;
@@ -102,6 +103,48 @@ public class ProjectService {
         projectRepository.save(project);
 
         projectRepository.delete(project);
+    }
+
+    @Transactional
+    public ProjectResponse assignEmployee(UUID projectId, UUID employeeId) {
+        Project project = projectRepository.findById(projectId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Project not found"));
+
+        Employee employee = employeeRepository.findById(employeeId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Employee not found"));
+
+
+        if (project.getAssignees().contains(employee)) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "Employee is already assigned to this project");
+        }
+
+        project.getAssignees().add(employee);
+
+
+        return toResponse(projectRepository.save(project));
+    }
+
+    @Transactional
+    public ProjectResponse removeAssignee(UUID projectId, UUID employeeId) {
+
+        Project project = projectRepository.findById(projectId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Project not found"));
+
+        Employee employee = employeeRepository.findById(employeeId)
+                .orElseThrow(() ->
+                        new ResponseStatusException(
+                                HttpStatus.NOT_FOUND,
+                                "Employee not found"
+                        ));
+
+        if (!project.getAssignees().remove(employee)) {
+            throw new ResponseStatusException(
+                    HttpStatus.CONFLICT,
+                    "Employee is not assigned to this project"
+            );
+        }
+
+        return toResponse(project);
     }
 
     @Transactional(readOnly = true)

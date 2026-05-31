@@ -98,17 +98,17 @@ public class TaskService {
     }
 
     @Transactional
-    public TaskResponse assignUserToTask(UUID taskId, UUID userId) {
+    public TaskResponse assignEmployeeToTask(UUID taskId, UUID employeeId) {
         Task task = taskRepository.findById(taskId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Task not found"));
 
-        Employee employee = employeeRepository.findByUserId(userId)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Employee for user not found"));
+        Employee employee = employeeRepository.findById(employeeId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Employee not found"));
 
         Project project = task.getProject();
 
         if (task.getAssignees().contains(employee)) {
-            throw new ResponseStatusException(HttpStatus.CONFLICT, "User is already assigned to this task");
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "Employee is already assigned to this task");
         }
 
         task.getAssignees().add(employee);
@@ -122,7 +122,7 @@ public class TaskService {
     }
 
     @Transactional
-    public TaskResponse removeAssignee(UUID taskId, UUID userId) {
+    public TaskResponse removeAssignee(UUID taskId, UUID employeeId) {
 
         Task task = taskRepository.findById(taskId)
                 .orElseThrow(() ->
@@ -131,17 +131,17 @@ public class TaskService {
                                 "Task not found"
                         ));
 
-        Employee employee = employeeRepository.findByUserId(userId)
+        Employee employee = employeeRepository.findById(employeeId)
                 .orElseThrow(() ->
                         new ResponseStatusException(
                                 HttpStatus.NOT_FOUND,
-                                "Employee for user not found"
+                                "Employee not found"
                         ));
 
         if (!task.getAssignees().remove(employee)) {
             throw new ResponseStatusException(
                     HttpStatus.CONFLICT,
-                    "User is not assigned to this task"
+                    "Employee is not assigned to this task"
             );
         }
 

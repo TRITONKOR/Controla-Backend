@@ -4,7 +4,9 @@ import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;
 import io.jsonwebtoken.JwtException;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -52,12 +54,14 @@ public class AuthController {
         String accessToken = jwtService.generateAccessToken(user);
         String refreshToken = jwtService.generateRefreshToken(user);
 
-        Cookie cookie = new Cookie(REFRESH_TOKEN_COOKIE, refreshToken);
-        cookie.setHttpOnly(true);
-        cookie.setSecure(true);
-        cookie.setPath("/api/auth");
-        cookie.setMaxAge(7 * 24 * 60 * 60);
-        response.addCookie(cookie);
+        ResponseCookie cookie = ResponseCookie.from(REFRESH_TOKEN_COOKIE, refreshToken)
+                .httpOnly(true)
+                .secure(true).
+                path("/api/auth").
+                maxAge(7 * 24 * 60 * 60)
+                        .sameSite("None")
+                                .build();
+        response.addHeader(HttpHeaders.SET_COOKIE, cookie.toString());
 
         return buildAuthResponse(accessToken, user);
     }
@@ -91,12 +95,14 @@ public class AuthController {
 
             tokenBlacklistService.blacklist(refreshToken, jwtService.extractExpiration(refreshToken));
 
-            Cookie cookie = new Cookie(REFRESH_TOKEN_COOKIE, newRefreshToken);
-            cookie.setHttpOnly(true);
-            cookie.setSecure(true);
-            cookie.setPath("/api/auth");
-            cookie.setMaxAge(7 * 24 * 60 * 60);
-            response.addCookie(cookie);
+            ResponseCookie cookie = ResponseCookie.from(REFRESH_TOKEN_COOKIE, newRefreshToken)
+                    .httpOnly(true)
+                    .secure(true).
+                    path("/api/auth").
+                    maxAge(7 * 24 * 60 * 60)
+                    .sameSite("None")
+                    .build();
+            response.addHeader(HttpHeaders.SET_COOKIE, cookie.toString());
 
             return buildAuthResponse(newAccessToken, user);
         } catch (JwtException | IllegalArgumentException ex) {
@@ -126,12 +132,14 @@ public class AuthController {
             }
         }
 
-        Cookie cookie = new Cookie(REFRESH_TOKEN_COOKIE, "");
-        cookie.setHttpOnly(true);
-        cookie.setSecure(true);
-        cookie.setPath("/api/auth");
-        cookie.setMaxAge(0);
-        response.addCookie(cookie);
+        ResponseCookie cookie = ResponseCookie.from(REFRESH_TOKEN_COOKIE, "")
+                .httpOnly(true)
+                .secure(true).
+                path("/api/auth").
+                maxAge(0)
+                .sameSite("None")
+                .build();
+        response.addHeader(HttpHeaders.SET_COOKIE, cookie.toString());
 
         return ResponseEntity.ok().build();
     }
@@ -182,11 +190,13 @@ public class AuthController {
     }
 
     private void clearRefreshCookie(HttpServletResponse response) {
-        Cookie cookie = new Cookie(REFRESH_TOKEN_COOKIE, "");
-        cookie.setHttpOnly(true);
-        cookie.setSecure(true);
-        cookie.setPath("/api/auth");
-        cookie.setMaxAge(0);
-        response.addCookie(cookie);
+        ResponseCookie cookie = ResponseCookie.from(REFRESH_TOKEN_COOKIE, "")
+                .httpOnly(true)
+                .secure(true).
+                path("/api/auth").
+                maxAge(0)
+                .sameSite("None")
+                .build();
+        response.addHeader(HttpHeaders.SET_COOKIE, cookie.toString());
     }
 }

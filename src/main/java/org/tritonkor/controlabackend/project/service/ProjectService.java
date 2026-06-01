@@ -25,10 +25,7 @@ import org.tritonkor.controlabackend.user.entity.Role;
 
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
-import java.util.EnumMap;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 
 @Service
 @RequiredArgsConstructor
@@ -43,6 +40,19 @@ public class ProjectService {
     public List<ProjectResponse> getAllProjects() {
         return projectRepository.findAll()
                 .stream()
+                .map(this::toResponse)
+                .toList();
+    }
+
+    @Transactional(readOnly = true)
+    public List<ProjectResponse> getProjectsByUserId(UUID userId) {
+        Employee employee = employeeRepository.findByUserId(userId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Employee not found"));
+
+
+        return projectRepository.findAll()
+                .stream()
+                .filter(project -> project.getAssignees().stream().anyMatch(e -> e.getId().equals(employee.getId())))
                 .map(this::toResponse)
                 .toList();
     }
@@ -143,6 +153,12 @@ public class ProjectService {
                     "Employee is not assigned to this project"
             );
         }
+
+        Set<Task> tasks = project.getTasks();
+        tasks.stream().map(Task::getAssignees)
+                .filter(assignees -> assignees.contains(employee))
+                .forEach(assignees -> assignees.remove(employee));
+
 
         return toResponse(project);
     }

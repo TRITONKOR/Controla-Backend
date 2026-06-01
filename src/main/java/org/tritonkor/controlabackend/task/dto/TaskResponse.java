@@ -24,6 +24,6 @@ public record TaskResponse(
             String userId,
             String firstName,
             String lastName,
-            String departmentTitle
+            String avatar
     ) {}
 }

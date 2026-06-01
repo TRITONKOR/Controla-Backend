@@ -1,7 +1,6 @@
 package org.tritonkor.controlabackend.project.controller;
 
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.repository.query.Param;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -12,7 +11,6 @@ import org.tritonkor.controlabackend.project.dto.CreateProjectRequest;
 import org.tritonkor.controlabackend.project.dto.ProjectResponse;
 import org.tritonkor.controlabackend.project.dto.ReportResponse;
 import org.tritonkor.controlabackend.project.service.ProjectService;
-import org.tritonkor.controlabackend.task.dto.TaskResponse;
 
 import java.util.List;
 import java.util.UUID;
@@ -27,6 +25,15 @@ public class ProjectController {
     @GetMapping
     public List<ProjectResponse> getAllProjects() {
         return projectService.getAllProjects();
+    }
+
+    @GetMapping(params = "userId")
+    public List<ProjectResponse> getProjectsByEmployee(@RequestParam UUID userId) {
+        try {
+            return projectService.getProjectsByUserId(userId);
+        } catch (Exception e) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage());
+        }
     }
 
     @PostMapping

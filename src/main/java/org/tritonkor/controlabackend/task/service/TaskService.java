@@ -145,19 +145,6 @@ public class TaskService {
             );
         }
 
-        Project project = task.getProject();
-
-        boolean hasOtherTasks =
-                taskRepository.hasOtherTasksInProject(
-                        project.getId(),
-                        task.getId(),
-                        employee
-                );
-
-        if (!hasOtherTasks) {
-            project.getAssignees().remove(employee);
-        }
-
         return toResponse(task);
     }
 
@@ -173,7 +160,7 @@ public class TaskService {
                         employee.getUser().getId().toString(),
                         employee.getFirstName(),
                         employee.getLastName(),
-                        employee.getDepartment() != null ? employee.getDepartment().getTitle() : null
+                        employee.getUser().getAvatar()
                 ))
                 .toList();
 

@@ -130,6 +130,7 @@ public class UserService implements org.springframework.security.core.userdetail
         user.setIsApproved(true);
         userRepository.save(user);
 
+
         return toStatusResponse(user);
     }
 

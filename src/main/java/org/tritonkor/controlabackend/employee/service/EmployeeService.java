@@ -28,6 +28,7 @@ public class EmployeeService {
     public List<EmployeeResponse> getAllEmployees() {
         return employeeRepository.findAll()
                 .stream()
+                .filter(employee -> employee.getUser().getIsApproved() != false)
                 .map(this::toResponse)
                 .toList();
     }
@@ -36,6 +37,7 @@ public class EmployeeService {
     public List<EmployeeResponse> getEmployeesByProject(Project project) {
         return project.getAssignees()
                 .stream()
+                .filter(employee -> employee.getUser().getIsApproved() != false)
                 .map(this::toResponse)
                 .toList();
     }

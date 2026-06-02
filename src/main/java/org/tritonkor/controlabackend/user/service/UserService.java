@@ -102,10 +102,11 @@ public class UserService implements org.springframework.security.core.userdetail
         if (request.firstName() != null) employee.setFirstName(request.firstName());
         if (request.lastName() != null) employee.setLastName(request.lastName());
 
-        if (request.departmentId() != null) {
-            Department department = departmentRepository.findById(request.departmentId())
-                    .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Department not found"));
-            employee.setDepartment(department);
+        if (request.email() != null) {
+            if (request.email().isBlank()) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Email must not be blank");
+            }
+            user.setEmail(request.email().trim());
         }
 
         if (request.avatar() != null) {
